@@ -107,3 +107,113 @@ http://localhost:8080/alfresco      - Alfresco Repository
 http://localhost:8080/share         - Alfresco Share
 https://localhost:8083/solr         - Alfresco Search Services (use keystores/client/browser.p12 certificate)
 ```
+
+# Instructions to setup mTLS Communication when using local deployment
+
+In order to apply this configuration when deploying Alfresco and Search Services in a local environment, following steps should be followed.
+
+## Alfresco configuration
+
+For these steps, Alfresco Repository is expected to be installed in `/usr/local/tomcat` folder.
+
+Note that this configuration is only applied from Search Services 2.0.0, as it's using the `classical` configuration from [Alfresco SSL Generator](https://github.com/Alfresco/alfresco-ssl-generator)
+
+Copy the contents of the [keystores/alfresco](keystores/alfresco) folder to `/usr/local/tomcat/alf_data/keystore` folder.
+
+```
+$ ls -l /usr/local/tomcat/alf_data/keystore/
+keystore
+keystore-passwords.properties
+ssl.keystore
+ssl-keystore-passwords.properties
+ssl.truststore
+ssl-truststore-passwords.properties
+```
+
+Add the following values to your `alfresco-global.properties` file.
+
+```
+$ cat /usr/local/tomcat/shared/classes/alfresco-global.properties
+solr.host=localhost
+solr.port.ssl=8983
+solr.secureComms=https
+dir.keystore=/usr/local/tomcat/alf_data/keystore
+alfresco.encryption.ssl.keystore.type=JCEKS
+alfresco.encryption.ssl.truststore.type=JCEKS
+```
+
+Add the following 8443 Connector to your Tomcat configuration file.
+
+```
+$ cat /usr/local/tomcat/conf/server.xml
+...
+    <Connector port="8443" protocol="org.apache.coyote.http11.Http11Protocol"
+        connectionTimeout="20000"
+        SSLEnabled="true" maxThreads="150" scheme="https"
+        keystoreFile="/usr/local/tomcat/alf_data/keystore/ssl.keystore"
+        keystorePass="kT9X6oe68t" keystoreType="JCEKS" secure="true"
+        truststoreFile="/usr/local/tomcat/alf_data/keystore/ssl.truststore"
+        truststorePass="kT9X6oe68t" truststoreType="JCEKS" clientAuth="want" sslProtocol="TLS">
+    </Connector>
+  </Service>
+</Server>
+```
+
+## Search Services configuration
+
+For these steps, Search Services is expected to be installed in `/opt/alfresco-search-services` folder.
+
+Note that this configuration is only applied from Search Services 2.0.0, as it's using the `current` configuration from [Alfresco SSL Generator](https://github.com/Alfresco/alfresco-ssl-generator)
+
+Copy the contents of the [keystores/solr](keystores/solr) folder to `/opt/alfresco-search-services/keystore` folder.
+
+```
+$ ls -l /opt/alfresco-search-services/keystore
+ssl-repo-client.keystore
+ssl-repo-client.truststore
+```
+
+Add the following values to your `/opt/alfresco-search-services/solrhome/alfresco/conf/solrcore.properties` file (or to your `/opt/alfresco-search-services/solrhome/templates/rerank/conf/solrcore.properties` file if you are creating cores by default with `-Dcreate.alfresco.defaults=alfresco,archive` command line option)
+
+```
+alfresco.secureComms=https
+alfresco.encryption.ssl.keystore.location=/opt/alfresco-search-services/keystore/ssl-repo-client.keystore
+alfresco.encryption.ssl.keystore.passwordFileLocation=
+alfresco.encryption.ssl.keystore.type=JCEKS
+alfresco.encryption.ssl.truststore.location=/opt/alfresco-search-services/keystore/ssl-repo-client.truststore
+alfresco.encryption.ssl.truststore.passwordFileLocation=
+alfresco.encryption.ssl.truststore.type=JCEKS
+```
+
+Add the following values to your `/opt/alfresco-search-services/solr.in.sh` file (or to `solr.in.cmd` file if you are installing SOLR in Windows)
+
+```
+$ cat /opt/alfresco-search-services/solr.in.sh
+SOLR_HOST=localhost
+SOLR_PORT=8443
+SOLR_SSL_TRUST_STORE=/opt/alfresco-search-services/keystore/ssl-repo-client.truststore
+SOLR_SSL_TRUST_STORE_TYPE=JCEKS
+SOLR_SSL_KEY_STORE=/opt/alfresco-search-services/keystore/ssl-repo-client.keystore
+SOLR_SSL_KEY_STORE_TYPE=JCEKS
+SOLR_SSL_NEED_CLIENT_AUTH=true
+```
+
+Start SOLR using the following parameters:
+
+```
+$ /opt/alfresco-search-services/solr/bin/solr start -a
+"-Dcreate.alfresco.defaults=alfresco,archive \
+-Dsolr.ssl.checkPeerName=false \
+-Dsolr.allow.unsafe.resourceloading=true \
+-Dsolr.jetty.truststore.password=kT9X6oe68t
+-Dsolr.jetty.keystore.password=kT9X6oe68t
+-Dssl-keystore.password=kT9X6oe68t
+-Dssl-keystore.aliases=ssl-alfresco-ca,ssl-repo-client
+-Dssl-keystore.ssl-alfresco-ca.password=kT9X6oe68t
+-Dssl-keystore.ssl-repo-client.password=kT9X6oe68t
+-Dssl-truststore.password=kT9X6oe68t
+-Dssl-truststore.aliases=ssl-alfresco-ca,ssl-repo,ssl-repo-client
+-Dssl-truststore.ssl-alfresco-ca.password=kT9X6oe68t
+-Dssl-truststore.ssl-repo.password=kT9X6oe68t
+-Dssl-truststore.ssl-repo-client.password=kT9X6oe68t" -f
+```
