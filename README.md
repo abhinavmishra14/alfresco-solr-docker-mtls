@@ -189,8 +189,6 @@ Add the following values to your `/opt/alfresco-search-services/solr.in.sh` file
 
 ```
 $ cat /opt/alfresco-search-services/solr.in.sh
-SOLR_HOST=localhost
-SOLR_PORT=8443
 SOLR_SSL_TRUST_STORE=/opt/alfresco-search-services/keystore/ssl-repo-client.truststore
 SOLR_SSL_TRUST_STORE_TYPE=JCEKS
 SOLR_SSL_KEY_STORE=/opt/alfresco-search-services/keystore/ssl-repo-client.keystore
