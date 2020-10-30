@@ -20,8 +20,8 @@ ENV TRUSTSTORE_TYPE=$TRUSTSTORE_TYPE \
 # Default value in "repository.properties" is "dir.keystore=classpath:alfresco/keystore"
 RUN echo -e "\n\
     dir.keystore=${ALF_DATA_DIR}/keystore\n\
-    alfresco.encryption.ssl.keystore.type=${TRUSTSTORE_TYPE}\n\
-    alfresco.encryption.ssl.truststore.type=${KEYSTORE_TYPE}\n\
+    encryption.ssl.keystore.type=${TRUSTSTORE_TYPE}\n\
+    encryption.ssl.truststore.type=${KEYSTORE_TYPE}\n\
     " >> ${TOMCAT_DIR}/shared/classes/alfresco-global.properties;
 
 # Enable SSL by adding the proper Connector to server.xml
