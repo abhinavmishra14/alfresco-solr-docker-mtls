@@ -138,8 +138,8 @@ solr.host=localhost
 solr.port.ssl=8983
 solr.secureComms=https
 dir.keystore=/usr/local/tomcat/alf_data/keystore
-alfresco.encryption.ssl.keystore.type=JCEKS
-alfresco.encryption.ssl.truststore.type=JCEKS
+encryption.ssl.keystore.type=JCEKS
+encryption.ssl.truststore.type=JCEKS
 ```
 
 Add the following 8443 Connector to your Tomcat configuration file.
