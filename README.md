@@ -191,8 +191,10 @@ Add the following values to your `/opt/alfresco-search-services/solr.in.sh` file
 $ cat /opt/alfresco-search-services/solr.in.sh
 SOLR_SSL_TRUST_STORE=/opt/alfresco-search-services/keystore/ssl-repo-client.truststore
 SOLR_SSL_TRUST_STORE_TYPE=JCEKS
+SOLR_SSL_TRUST_STORE_PASSWORD=kT9X6oe68t
 SOLR_SSL_KEY_STORE=/opt/alfresco-search-services/keystore/ssl-repo-client.keystore
 SOLR_SSL_KEY_STORE_TYPE=JCEKS
+SOLR_SSL_KEY_STORE_PASSWORD=kT9X6oe68t
 SOLR_SSL_NEED_CLIENT_AUTH=true
 ```
 
